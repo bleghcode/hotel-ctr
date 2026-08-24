@@ -3,156 +3,156 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CONTRACT RATE</title>
+  <title>Hotel Contract Database</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
-      display: flex;
-      justify-content: center;
-      padding: 30px 15px;
-    }
-    .card-container {
-      width: 100%;
-      max-width: 380px;
-      background: #ffffff;
-      padding: 24px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      text-align: center;
-    }
-    .header-title {
-      font-size: 18px;
-      font-weight: bold;
-      letter-spacing: 1px;
-      margin-bottom: 24px;
-      color: #333;
-    }
-    .search-group {
-      text-align: left;
-      margin-bottom: 24px;
-    }
-    .search-label {
-      font-size: 14px;
-      font-weight: bold;
-      margin-bottom: 6px;
-      display: block;
-      color: #444;
-    }
-    .search-input {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+    * {
       box-sizing: border-box;
-      font-size: 15px;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #121212;
+      color: #ffffff;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .search-box {
+      width: 100%;
+      max-width: 600px;
+      margin-bottom: 30px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 15px 20px;
+      font-size: 18px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background-color: #1e1e1e;
+      color: #fff;
       outline: none;
+      transition: border-color 0.3s;
     }
+
+    .search-box input:focus {
+      border-color: #0070f3;
+    }
+
+    .results-grid {
+      width: 100%;
+      max-width: 1000px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
     .result-item {
-      margin-top: 20px;
-      padding-top: 15px;
-      border-top: 1px dashed #ddd;
+      background-color: #1e1e1e;
+      border-radius: 10px;
+      padding: 20px;
+      border: 1px solid #2a2a2a;
+      display: flex;
+      flex-direction: column;
     }
+
     .hotel-name {
       font-size: 20px;
       font-weight: bold;
-      color: #222;
-      margin-bottom: 4px;
+      margin-bottom: 5px;
+      color: #ffffff;
     }
+
     .location {
       font-size: 14px;
-      color: #666;
-      margin-bottom: 20px;
+      color: #aaa;
+      margin-bottom: 15px;
     }
-    .contract-label {
-      font-size: 14px;
-      margin-bottom: 8px;
-      color: #444;
+
+    .contract-label, .expiry-label {
+      font-size: 12px;
+      color: #888;
+      margin-top: 10px;
     }
+
     .btn-open {
       display: inline-block;
-      background-color: #000;
-      color: #fff;
-      padding: 10px 24px;
-      border-radius: 6px;
+      margin-top: 5px;
+      padding: 8px 12px;
+      background-color: #0070f3;
+      color: white;
       text-decoration: none;
+      border-radius: 5px;
       font-weight: bold;
-      font-size: 13px;
-      letter-spacing: 0.5px;
-      margin-bottom: 20px;
+      text-align: center;
+      transition: background-color 0.2s;
     }
+
     .btn-open:hover {
-      background-color: #333;
+      background-color: #0051a8;
     }
-    .expiry-label {
-      font-size: 13px;
-      color: #666;
-    }
+
     .expiry-date {
-      font-size: 15px;
-      font-weight: bold;
-      color: #d9534f;
+      font-size: 16px;
+      font-weight: 500;
+      color: #ff4d4f;
       margin-top: 4px;
     }
   </style>
 </head>
 <body>
 
-<div class="card-container">
-  <div class="header-title">CONTRACT RATE</div>
-
-  <div class="search-group">
-    <label class="search-label">🔍 Search </label>
-    <input type="text" id="searchInput" class="search-input" placeholder="Hotel Name" oninput="handleSearch()">
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="พิมพ์ชื่อโรงแรมเพื่อค้นหา..." oninput="handleSearch()">
   </div>
 
-  <div id="resultsList"></div>
-</div>
+  <div class="results-grid" id="resultsContainer"></div>
 
-<script>
-  let timer;
+  <script>
+    let timer;
+    function handleSearch() {
+      const keyword = document.getElementById('searchInput').value;
+      clearTimeout(timer);
 
-  function handleSearch() {
-    clearTimeout(timer);
-    const query = document.getElementById('searchInput').value.trim();
-
-    // ชะลอการยิง API ขณะพิมพ์ (Debounce)
-    timer = setTimeout(async () => {
-      try {
-        const response = await fetch(`/api/search?query=${encodeURIComponent(keyword)}
-        const data = await response.json();
-        
-        const container = document.getElementById('resultsList');
+      timer = setTimeout(async () => {
+        const container = document.getElementById('resultsContainer');
         container.innerHTML = '';
 
-        if (data.length === 0) {
-          container.innerHTML = '<div style="color: #999; margin-top: 20px;">ไม่พบข้อมูล</div>';
-          return;
+        if (!keyword.trim()) return;
+
+        try {
+          const response = await fetch(`/api/search?query=${encodeURIComponent(keyword)}`);
+          const data = await response.json();
+
+          if (!data || data.length === 0) {
+            container.innerHTML = '<div style="color:#888; text-align:center; grid-column: 1/-1;">ไม่พบข้อมูลโรงแรม</div>';
+            return;
+          }
+
+          data.forEach(item => {
+            container.innerHTML += `
+              <div class="result-item">
+                <div class="hotel-name">${item.name}</div>
+                <div class="location">${item.location}</div>
+
+                <div class="contract-label">📄 Contract Rate</div>
+                <a href="${item.contractUrl}" target="_blank" class="btn-open">[ OPEN FILE ]</a>
+
+                <div class="expiry-label">Expiry Date</div>
+                <div class="expiry-date">${item.expiryDate}</div>
+              </div>
+            `;
+          });
+        } catch (error) {
+          console.error('Search error:', error);
         }
-
-        data.forEach(item => {
-          container.innerHTML += `
-            <div class="result-item">
-              <div class="hotel-name">${item.name}</div>
-              <div class="location">${item.location}</div>
-
-              <div class="contract-label">📄 Contract</div>
-              <a href="${item.contractUrl}" target="_blank" class="btn-open">[ OPEN FILE ]</a>
-
-              <div class="expiry-label">Expiry Date</div>
-              <div class="expiry-date">${item.expiryDate}</div>
-            </div>
-          `;
-        });
-      } catch (err) {
-        console.error('Error fetching data:', err);
-      }
-    }, 300);
-  }
-
-  // โหลดข้อมูลทั้งหมดขึ้นมาก่อนตอนเปิดหน้าแรก
-  handleSearch();
-</script>
-
+      }, 300);
+    }
+  </script>
 </body>
 </html>
