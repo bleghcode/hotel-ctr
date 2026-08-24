@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CONTRACT RATE</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      padding: 30px 15px;
+    }
+    .card-container {
+      width: 100%;
+      max-width: 380px;
+      background: #ffffff;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    .header-title {
+      font-size: 18px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      margin-bottom: 24px;
+      color: #333;
+    }
+    .search-group {
+      text-align: left;
+      margin-bottom: 24px;
+    }
+    .search-label {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 6px;
+      display: block;
+      color: #444;
+    }
+    .search-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-size: 15px;
+      outline: none;
+    }
+    .result-item {
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 1px dashed #ddd;
+    }
+    .hotel-name {
+      font-size: 20px;
+      font-weight: bold;
+      color: #222;
+      margin-bottom: 4px;
+    }
+    .location {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 20px;
+    }
+    .contract-label {
+      font-size: 14px;
+      margin-bottom: 8px;
+      color: #444;
+    }
+    .btn-open {
+      display: inline-block;
+      background-color: #000;
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      margin-bottom: 20px;
+    }
+    .btn-open:hover {
+      background-color: #333;
+    }
+    .expiry-label {
+      font-size: 13px;
+      color: #666;
+    }
+    .expiry-date {
+      font-size: 15px;
+      font-weight: bold;
+      color: #d9534f;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="card-container">
+  <div class="header-title">CONTRACT RATE</div>
+
+  <div class="search-group">
+    <label class="search-label">🔍 Search </label>
+    <input type="text" id="searchInput" class="search-input" placeholder="Hotel Name" oninput="handleSearch()">
+  </div>
+
+  <div id="resultsList"></div>
+</div>
+
+<script>
+  let timer;
+
+  function handleSearch() {
+    clearTimeout(timer);
+    const query = document.getElementById('searchInput').value.trim();
+
+    // ชะลอการยิง API ขณะพิมพ์ (Debounce)
+    timer = setTimeout(async () => {
+      try {
+        const response = await fetch(`/api/search?query=${encodeURIComponent(keyword)}
+        const data = await response.json();
+        
+        const container = document.getElementById('resultsList');
+        container.innerHTML = '';
+
+        if (data.length === 0) {
+          container.innerHTML = '<div style="color: #999; margin-top: 20px;">ไม่พบข้อมูล</div>';
+          return;
+        }
+
+        data.forEach(item => {
+          container.innerHTML += `
+            <div class="result-item">
+              <div class="hotel-name">${item.name}</div>
+              <div class="location">${item.location}</div>
+
+              <div class="contract-label">📄 Contract</div>
+              <a href="${item.contractUrl}" target="_blank" class="btn-open">[ OPEN FILE ]</a>
+
+              <div class="expiry-label">Expiry Date</div>
+              <div class="expiry-date">${item.expiryDate}</div>
+            </div>
+          `;
+        });
+      } catch (err) {
+        console.error('Error fetching data:', err);
+      }
+    }, 300);
+  }
+
+  // โหลดข้อมูลทั้งหมดขึ้นมาก่อนตอนเปิดหน้าแรก
+  handleSearch();
+</script>
+
+</body>
+</html>
