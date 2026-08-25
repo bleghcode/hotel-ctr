@@ -108,7 +108,7 @@
 <body>
 
   <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Search hotel name... (พิมพ์ชื่อโรงแรมเพื่อค้นหา... )" oninput="handleSearch()">
+    <input type="text" id="searchInput" placeholder="Search Hotel Name... (พิมพ์ชื่อโรงแรมเพื่อค้นหา..." oninput="handleSearch()">
   </div>
 
   <div class="results-grid" id="resultsContainer"></div>
@@ -130,9 +130,35 @@
           const data = await response.json();
 
           if (!data || data.length === 0) {
-            container.innerHTML = '<div style="color:#888; text-align:center; grid-column: 1/-1;">ไม่พบข้อมูลโรงแรม</div>';
-            return;
-          }
+           const hotelList = [
+      "Season Siam", "Ten Star Inn", "Pj WaterGate", "Pannarai 🌏", "Baiyoke Suite 💲",
+      "Baiyoke Sky 🏩", "Baiyoke Boutique🅱️", "Tango Vibrant🔔", "Dream Town", 
+      "Bangkok Palace 🎴", "De Bangkok🈳", "Visiting Card 🦀", "Ramada Hotel Bangkok", 
+      "Centara Watergate Pavilion Hotel", "The Berkeley", "J Two S Pratunam", 
+      "The Ecotel Bangkok💊", "Nova Platinum", "De Prime Rangnam", 
+      "FuramaXclusive Pratunam Park", "Centre Point🤖", "Ambassador Hotel Bangkok", 
+      "Grand Hyatt Erawan", "Beston pattaya", "Golden Beach", 
+      "Eastern Grand Palace Pattaya", "Welcome Plaza✡️", "Heeton Concept🌹", 
+      "Caesar Palace", "Arawana South Pattaya", "Sun Sea Sand🍞", 
+      "Phoenix Grand Patong🌈", "Sofitel Krabi Phokeethra Golf & Spa Resort", 
+      "Best Western Patong Phuket", "The Crib Patong , Phuket", 
+      "Splash Beach Resort Phuket", "Burasari Resort", "Portofino Toscana ☕"
+    ];
+
+  const listItems = hotelList.map(hotel => `<li>${hotel}</li>`).join('');
+    container.innerHTML = `
+      <div style="grid-column: 1/-1; text-align: center; color: #888; padding: 20px;">
+        <p class="notice" style="font-weight: bold; margin-bottom: 15px;">
+          If data is not found, please refresh (F5) or re-enter the website.
+        </p>
+        <h3 style="margin-bottom: 10px; color: #fff;">Available Hotel List</h3>
+        <ul style="list-style: none; padding: 0; display: inline-block; text-align: left; line-height: 1.8;">
+          ${listItems}
+        </ul>
+      </div>
+    `;
+    return;
+  }
 
           data.forEach(item => {
             container.innerHTML += `
