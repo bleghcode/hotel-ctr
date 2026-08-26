@@ -13,7 +13,6 @@ export async function onRequestGet(context) {
   }
 
   try {
-    // จุดที่ 1: ดึงข้อมูลทั้งหมดจาก Notion ออกมาก่อน (ไม่กรองเฉพาะคอลัมน์ Hotel ที่ฝั่ง Notion)
     const response = await fetch(`https://api.notion.com/v1/databases/${DATABASE_ID}/query`, {
       method: 'POST',
       headers: {
@@ -57,7 +56,7 @@ export async function onRequestGet(context) {
       };
     });
 
-    // จุดที่ 2: กรองข้อมูลตรงนี้ เพื่อให้ค้นเจอทั้ง "ชื่อโรงแรม" (name) และ "สถานที่" (location)
+    // 1. ค้นหาทั้ง ชื่อโรงแรม และ สถานที่ (Bangkok, Pattaya, Phuket ฯลฯ)
     const cleanQuery = query ? query.toLowerCase().trim() : '';
     const filteredResults = cleanQuery
       ? results.filter(item =>
@@ -66,7 +65,12 @@ export async function onRequestGet(context) {
         )
       : results;
 
-    return new Response(JSON.stringify(filteredResults), {
+    // 2. ตัดเฉพาะแถวที่ ID ซ้ำกันใน Notion ออก (ไม่กระทบการค้นหาสถานที่)
+    const uniqueResults = Array.from(
+      new Map(filteredResults.map(item => [item.id, item])).values()
+    );
+
+    return new Response(JSON.stringify(uniqueResults), {
       headers: { 
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*' 
