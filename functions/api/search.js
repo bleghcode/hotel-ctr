@@ -39,7 +39,7 @@ export async function onRequestGet(context) {
       }
 
       const rawDate = props['EXP']?.date?.start;
-      let formattedDate = '-';
+      let formattedDate = 'Request Rate';
       if (rawDate) {
         const [yyyy, mm, dd] = rawDate.split('-');
         formattedDate = `${dd}/${mm}/${yyyy}`;
