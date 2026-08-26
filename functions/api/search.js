@@ -13,6 +13,7 @@ export async function onRequestGet(context) {
   }
 
   try {
+    // จุดที่ 1: ดึงข้อมูลทั้งหมดจาก Notion ออกมาก่อน (ไม่กรองเฉพาะคอลัมน์ Hotel ที่ฝั่ง Notion)
     const response = await fetch(`https://api.notion.com/v1/databases/${DATABASE_ID}/query`, {
       method: 'POST',
       headers: {
@@ -20,12 +21,7 @@ export async function onRequestGet(context) {
         'Notion-Version': '2022-06-28',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(query ? {
-        filter: {
-          property: 'Hotel',
-          title: { contains: query },
-        },
-      } : {}),
+      body: JSON.stringify({}),
     });
 
     const data = await response.json();
@@ -61,7 +57,16 @@ export async function onRequestGet(context) {
       };
     });
 
-    return new Response(JSON.stringify(results), {
+    // จุดที่ 2: กรองข้อมูลตรงนี้ เพื่อให้ค้นเจอทั้ง "ชื่อโรงแรม" (name) และ "สถานที่" (location)
+    const cleanQuery = query ? query.toLowerCase().trim() : '';
+    const filteredResults = cleanQuery
+      ? results.filter(item =>
+          item.name.toLowerCase().includes(cleanQuery) ||
+          item.location.toLowerCase().includes(cleanQuery)
+        )
+      : results;
+
+    return new Response(JSON.stringify(filteredResults), {
       headers: { 
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*' 
