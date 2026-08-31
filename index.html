@@ -161,7 +161,9 @@
         return;
       }
 
-      // วาดการ์ดทั้งหมดขึ้นหน้าจอในครั้งเดียว เพื่อประสิทธิภาพและความเร็ว
+      const isRequestRate = item.expiryDate === 'Request Rate';
+      const expiryColor = isRequestRate ? '#ffffff' : '#ff4d4f';
+
       container.innerHTML = data.map(item => `
         <div class="result-item">
           <div class="hotel-name">${item.name}</div>
