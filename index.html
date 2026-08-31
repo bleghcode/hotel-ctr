@@ -111,86 +111,89 @@
 <body>
 
   <div class="search-box">
-    <input type="text" id="searchInput" placeholder="Search Hotel Name... (พิมพ์ชื่อโรงแรมเพื่อค้นหา..." oninput="handleSearch()">
+    <input type="text" id="searchInput" placeholder="Search Hotel Name... (พิมพ์ชื่อโรงแรมเพื่อค้นหา)" oninput="handleSearch()">
   </div>
 
   <div class="results-grid" id="resultsContainer"></div>
 
- <script>
-  let timer;
+  <script>
+    let timer;
 
-  async function fetchHotels(keyword = '') {
-    const container = document.getElementById('resultsContainer');
-    container.innerHTML = ''; // ล้างหน้าจอก่อนทุกครั้ง
+    async function fetchHotels(keyword = '') {
+      const container = document.getElementById('resultsContainer');
+      container.innerHTML = ''; // ล้างหน้าจอก่อนทุกครั้ง
 
-    try {
-      // ป้องกันเบราว์เซอร์จำ Cache โดยใส่ timestamp (&_t=...) และ cache: 'no-store'
-      const response = await fetch(`/api/search?query=${encodeURIComponent(keyword)}&_t=${Date.now()}`, {
-        cache: 'no-store'
-      });
-      const data = await response.json();
+      try {
+        const response = await fetch(`/api/search?query=${encodeURIComponent(keyword)}&_t=${Date.now()}`, {
+          cache: 'no-store'
+        });
+        const data = await response.json();
 
-      if (!data || data.length === 0) {
-        const hotelList = [
-          "Season Siam", "Ten Star Inn", "Pj WaterGate", "Pannarai 🌏", "Baiyoke Suite 💲",
-          "Baiyoke Sky 🏩", "Baiyoke Boutique🅱️", "Tango Vibrant🔔", "Dream Town", 
-          "Bangkok Palace 🎴", "De Bangkok🈳", "Visiting Card 🦀", "Ramada Hotel Bangkok", 
-          "Centara Watergate Pavilion Hotel", "The Berkeley", "J Two S Pratunam", 
-          "The Ecotel Bangkok💊", "Nova Platinum", "De Prime Rangnam", 
-          "FuramaXclusive Pratunam Park", "Centre Point🤖", "Ambassador Hotel Bangkok", 
-          "Grand Hyatt Erawan", "Beston pattaya", "Golden Beach", 
-          "Eastern Grand Palace Pattaya", "Welcome Plaza✡️", "Heeton Concept🌹", 
-          "Caesar Palace", "Arawana South Pattaya", "Sun Sea Sand🍞", 
-          "Phoenix Grand Patong🌈", "Sofitel Krabi Phokeethra Golf & Spa Resort", 
-          "Best Western Patong Phuket", "The Crib Patong , Phuket", 
-          "Splash Beach Resort Phuket", "Burasari Resort", "Portofino Toscana ☕"
-        ];
+        if (!data || data.length === 0) {
+          const hotelList = [
+            "Season Siam", "Ten Star Inn", "Pj WaterGate", "Pannarai 🌏", "Baiyoke Suite 💲",
+            "Baiyoke Sky 🏩", "Baiyoke Boutique🅱️", "Tango Vibrant🔔", "Dream Town", 
+            "Bangkok Palace 🎴", "De Bangkok🈳", "Visiting Card 🦀", "Ramada Hotel Bangkok", 
+            "Centara Watergate Pavilion Hotel", "The Berkeley", "J Two S Pratunam", 
+            "The Ecotel Bangkok💊", "Nova Platinum", "De Prime Rangnam", 
+            "FuramaXclusive Pratunam Park", "Centre Point🤖", "Ambassador Hotel Bangkok", 
+            "Grand Hyatt Erawan", "Beston pattaya", "Golden Beach", 
+            "Eastern Grand Palace Pattaya", "Welcome Plaza✡️", "Heeton Concept🌹", 
+            "Caesar Palace", "Arawana South Pattaya", "Sun Sea Sand🍞", 
+            "Phoenix Grand Patong🌈", "Sofitel Krabi Phokeethra Golf & Spa Resort", 
+            "Best Western Patong Phuket", "The Crib Patong , Phuket", 
+            "Splash Beach Resort Phuket", "Burasari Resort", "Portofino Toscana ☕"
+          ];
 
-        const listItems = hotelList.map(hotel => `<li>${hotel}</li>`).join('');
-        container.innerHTML = `
-          <div style="grid-column: 1/-1; text-align: center; color: #888; padding: 20px;">
-            <p class="notice" style="font-weight: bold; margin-bottom: 15px;">
-              "Please check the available hotel list below. If data is still not found, try refreshing (F5) or re-entering the website."
-            </p>
-            <h3 style="margin-bottom: 10px; color: #fff;">Available Hotel List</h3>
-            <ul style="list-style: none; padding: 0; display: inline-block; text-align: left; line-height: 1.8;">
-              ${listItems}
-            </ul>
-          </div>
-        `;
-        return;
+          const listItems = hotelList.map(hotel => `<li>${hotel}</li>`).join('');
+          container.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; color: #888; padding: 20px;">
+              <p class="notice" style="font-weight: bold; margin-bottom: 15px;">
+                "Please check the available hotel list below. If data is still not found, try refreshing (F5) or re-entering the website."
+              </p>
+              <h3 style="margin-bottom: 10px; color: #fff;">Available Hotel List</h3>
+              <ul style="list-style: none; padding: 0; display: inline-block; text-align: left; line-height: 1.8;">
+                ${listItems}
+              </ul>
+            </div>
+          `;
+          return;
+        }
+
+        // ย้ายการเช็คสีเข้าไปข้างใน map(...) เพื่อให้ทำงานกับ item แต่ละตัว
+        container.innerHTML = data.map(item => {
+          const isRequestRate = item.expiryDate === 'Request Rate';
+          const expiryColor = isRequestRate ? '#ffffff' : '#ff4d4f';
+
+          return `
+            <div class="result-item">
+              <div class="hotel-name">${item.name}</div>
+              <div class="location">${item.location}</div>
+
+              <div class="contract-label">📄 Contract Rate</div>
+              <a href="${item.contractUrl}" target="_blank" class="btn-open">[ OPEN FILE ]</a>
+
+              <div class="expiry-label">Expiry Date</div>
+              <div class="expiry-date" style="color: ${expiryColor};">${item.expiryDate}</div>
+            </div>
+          `;
+        }).join('');
+
+      } catch (error) {
+        console.error('Search error:', error);
       }
-
-      const isRequestRate = item.expiryDate === 'Request Rate';
-      const expiryColor = isRequestRate ? '#ffffff' : '#ff4d4f';
-
-      container.innerHTML = data.map(item => `
-        <div class="result-item">
-          <div class="hotel-name">${item.name}</div>
-          <div class="location">${item.location}</div>
-
-          <div class="contract-label">📄 Contract Rate</div>
-          <a href="${item.contractUrl}" target="_blank" class="btn-open">[ OPEN FILE ]</a>
-
-          <div class="expiry-label">Expiry Date</div>
-          <div class="expiry-date">${item.expiryDate}</div>
-        </div>
-      `).join('');
-
-    } catch (error) {
-      console.error('Search error:', error);
     }
-  }
 
-  function handleSearch() {
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      const keyword = document.getElementById('searchInput').value;
-      fetchHotels(keyword);
-    }, 300);
-  }
+    function handleSearch() {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        const keyword = document.getElementById('searchInput').value;
+        fetchHotels(keyword);
+      }, 300);
+    }
 
-  // ดึงข้อมูลโรงแรมทั้งหมดมาแสดงทันทีเมื่อเปิดหน้าเว็บ
-  window.onload = () => fetchHotels('');
-</script>
-  
+    // ดึงข้อมูลโรงแรมทั้งหมดมาแสดงทันทีเมื่อเปิดหน้าเว็บ
+    window.onload = () => fetchHotels('');
+  </script>
+</body>
+</html>
